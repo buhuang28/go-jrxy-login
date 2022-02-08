@@ -1,0 +1,9 @@
+*.exe
+*_test.go
+*.dll
+*.log
+.idea
+/user
+/img
+/log
+*.json
