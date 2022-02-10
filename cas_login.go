@@ -14,10 +14,8 @@ func CASLogin(userName, passWord, loginUrl, loginHost, cookie string) string {
 		fmt.Println("登录失败，访问", loginUrl, "失败")
 		return ""
 	}
-
 	pwSalt := ""
 	loginType := 0
-
 	params := make(map[string]string)
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(resp.Data))
 	if err != nil {

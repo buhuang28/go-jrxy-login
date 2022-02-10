@@ -23,7 +23,12 @@ func Login(c *gin.Context) {
 	}
 
 	info := GetSchoolLoginInfo(loginReq.SchoolName)
-	loginCookie := CASLogin(loginReq.UserName, loginReq.PassWord, info["loginUrl"], "", info["cookie"])
+	loginCookie := ""
+	if info["loginType"] == "CLOUD" {
+		loginCookie = IAPLogin(loginReq.UserName, loginReq.PassWord, info["loginUrl"], info["loginHost"], info["cookie"])
+	} else {
+		loginCookie = CASLogin(loginReq.UserName, loginReq.PassWord, info["loginUrl"], info["loginHost"], info["cookie"])
+	}
 	if loginCookie == "" {
 		result.Fail(-2, "登录失败")
 		c.JSON(http.StatusOK, result)

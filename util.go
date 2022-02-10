@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -253,6 +254,84 @@ func PostForm(api string, cookie *map[string]string, header, params map[string]s
 		}
 	}
 	request, err := http.NewRequest("POST", api, bytes.NewReader([]byte(data.Encode())))
+	timeout := time.Duration(6 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	//禁止重定向，防止cookie丢失
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return errors.New("Redirect")
+	}
+	if cookie != nil && len(*cookie) != 0 {
+		if header == nil {
+			header = make(map[string]string)
+		}
+		header["Cookie"] = CookieMap2Str(*cookie)
+	}
+
+	request.Header.Set(UA_KEY, UA_VALUE)
+	request.Header.Set(CONTENT_TYPE_KEY, CAS_CONTENT_TYPE_VALUE)
+
+	if header != nil {
+		for k, v := range header {
+			request.Header.Set(k, v)
+		}
+	}
+
+	res, err := client.Do(request)
+	defer func() {
+		if res != nil && res.Body != nil {
+			res.Body.Close()
+		}
+	}()
+
+	if err != nil && res.StatusCode != 302 && res.StatusCode != 301 {
+		return false, HttpResp{}
+	}
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		logger.Println("读取内容失败:", err.Error())
+	}
+	resCookie := res.Cookies()
+	if cookie == nil {
+		tempCk := make(map[string]string)
+		cookie = &tempCk
+	}
+	for _, v := range resCookie {
+		if _, ok := (*cookie)[v.Name]; ok {
+			(*cookie)[v.Name] += ";" + v.Value
+		} else {
+			(*cookie)[v.Name] = v.Value
+		}
+	}
+
+	var resp HttpResp
+
+	location, err := res.Location()
+	if location != nil && location.String() != "" {
+		resp.Localtion = location.String()
+	}
+	resp.Cookie = cookie
+	resp.Data = respBytes
+	resp.Error = nil
+	return true, resp
+}
+
+func PostJson(api string, cookie *map[string]string, header map[string]string, data interface{}) (bool, HttpResp) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	bytesData := []byte(`{}`)
+
+	if data != nil {
+		bytesData, _ = json.Marshal(data)
+	}
+
+	request, err := http.NewRequest("POST", api, bytes.NewReader(bytesData))
 	timeout := time.Duration(6 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
