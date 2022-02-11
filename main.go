@@ -11,7 +11,7 @@ var (
 )
 
 func init() {
-	logFileNmae := `./log/` + time.Now().Format("20060102") + ".log"
+	logFileNmae := `./log/` + time.Now().Format("20060102") + "loginapi.log"
 	logFileAllPath := logFileNmae
 	_, err := os.Stat(logFileAllPath)
 	exits := CheckFileIsExits(`log`)

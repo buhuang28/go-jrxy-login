@@ -7,13 +7,13 @@ import (
 )
 
 func Login(c *gin.Context) {
+	result := HttpResult{}
 	defer func() {
 		err := recover()
 		if err != nil {
 			logger.Println(err)
 		}
 	}()
-	result := HttpResult{}
 
 	loginReq := &LoginReq{}
 	err := c.Bind(loginReq)
