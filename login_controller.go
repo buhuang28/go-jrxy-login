@@ -20,6 +20,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		result.Fail(-1, "非法请求")
 		c.JSON(http.StatusOK, result)
+		return
 	}
 
 	info := GetSchoolLoginInfo(loginReq.SchoolName)
@@ -32,6 +33,7 @@ func Login(c *gin.Context) {
 	if loginCookie == "" {
 		result.Fail(-2, "登录失败")
 		c.JSON(http.StatusOK, result)
+		return
 	}
 	fmt.Println("登录成功:", loginCookie)
 	result.Success(loginCookie, info["campusHost"])

@@ -31,12 +31,12 @@ func GetHost(data string) string {
 }
 
 func GetReqeust(u string, cookie *map[string]string, header, params map[string]string) (bool, HttpResp) {
-	//defer func() {
-	//	err := recover()
-	//	if err != nil {
-	//		fmt.Println(err)
-	//	}
-	//}()
+	defer func() {
+		err := recover()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	if u == "" {
 		return false, HttpResp{}
