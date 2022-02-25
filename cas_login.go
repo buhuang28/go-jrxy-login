@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"regexp"
+	"strings"
 )
 
 func CASLogin(userName, passWord, loginUrl, loginHost, cookie string) string {
@@ -36,7 +37,7 @@ func CASLogin(userName, passWord, loginUrl, loginHost, cookie string) string {
 	}
 
 	form.Each(func(i int, s *goquery.Selection) {
-		if i == 1 {
+		if (loginType != 0 && i == 1) || (loginType == 0 && i == 0) {
 			s.Find("input").Each(func(j int, s2 *goquery.Selection) {
 				for _, v := range s2.Nodes {
 					key := ""
@@ -72,6 +73,7 @@ func CASLogin(userName, passWord, loginUrl, loginHost, cookie string) string {
 			pwSalt = string(all[0])
 		}
 	}
+	pwSalt = strings.ReplaceAll(pwSalt, `"`, "")
 
 	if pwSalt != "" {
 		switch loginType {
