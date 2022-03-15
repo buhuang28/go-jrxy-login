@@ -75,35 +75,33 @@ func CASLogin(userName, passWord, loginUrl, loginHost, cookie string) string {
 	}
 	pwSalt = strings.ReplaceAll(pwSalt, `"`, "")
 
-	if pwSalt != "" {
-		switch loginType {
-		case 0, 1:
-			//AES
+	switch loginType {
+	case 0, 1:
+		//AES
+		if pwSalt != "" {
 			params["password"], _ = AESEncrypt([]byte(RandStr(64)+passWord), []byte(pwSalt))
-			success, httpResp := PostForm(loginUrl, &ck, nil, params)
-			if !success {
-				fmt.Println("登录失败，可能是密码错误1")
-				return ""
-			}
-			if httpResp.Localtion == "" {
-				fmt.Println("登录失败，可能是密码错误2")
-				return ""
-			}
-			success, httpResp = PostForm(httpResp.Localtion, &ck, nil, nil)
-			if !success {
-				fmt.Println("登录失败，可能是密码错误3")
-				return ""
-			} else {
-				return CookieMap2Str(*httpResp.Cookie)
-			}
-		case 2:
-			//RSA,懒得做...告辞
+		} else {
+			params["password"] = passWord
 		}
+		success, httpResp := PostForm(loginUrl, &ck, nil, params)
+		if !success {
+			fmt.Println("登录失败，可能是密码错误1")
+			return ""
+		}
+		if httpResp.Localtion == "" {
+			fmt.Println("登录失败，可能是密码错误2")
+			return ""
+		}
+		success, httpResp = PostForm(httpResp.Localtion, &ck, nil, nil)
+		if !success {
+			fmt.Println("登录失败，可能是密码错误3")
+			return ""
+		} else {
+			return CookieMap2Str(*httpResp.Cookie)
+		}
+	case 2:
+		//RSA,懒得做...告辞
 	}
-	fmt.Println("找不到盐，可能不需要盐，但是我不想写，懒，告辞。")
+	fmt.Println("我也母鸡啥问题啊...")
 	return ""
 }
-
-//func CheckNeedCaptcha(joinType int32,userName string,cookie *map[string]string) bool {
-//
-//}
